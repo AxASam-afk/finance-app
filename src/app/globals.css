@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Palette "ledger" — sauge/jade plutôt que crème/terracotta générique */
+  --ink: 20 32 28; /* #14201C texte principal */
+  --paper: 255 255 255; /* surfaces cartes en clair */
+  --surface: 238 240 234; /* fond de page clair, sauge pâle */
+  --border: 218 214 201; /* #DAD6C9 */
+  --muted: 107 119 111; /* texte secondaire */
+
+  --jade: 31 111 92; /* #1F6F5C — positif / revenus / croissance */
+  --jade-soft: 224 236 231;
+  --clay: 168 64 47; /* #A8402F — dépenses / alertes */
+  --clay-soft: 246 227 222;
+  --sand: 156 122 15; /* #9C7A0F — épargne / objectifs */
+  --sand-soft: 244 235 209;
+}
+
+.dark {
+  --ink: 233 234 226; /* texte clair sur fond sombre */
+  --paper: 22 38 31; /* #16261F cartes */
+  --surface: 16 32 27; /* #10201B fond de page */
+  --border: 36 53 44; /* #24352C */
+  --muted: 150 163 152;
+
+  --jade: 79 191 160; /* #4FBFA0 plus lumineux pour contraste */
+  --jade-soft: 24 48 41;
+  --clay: 224 133 113; /* #E08571 */
+  --clay-soft: 55 33 29;
+  --sand: 217 176 61; /* #D9B03D */
+  --sand-soft: 51 42 15;
+}
+
+body {
+  background-color: rgb(var(--surface));
+  color: rgb(var(--ink));
+}
+
+/* Les chiffres financiers s'alignent en colonnes (chiffres tabulaires) */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}

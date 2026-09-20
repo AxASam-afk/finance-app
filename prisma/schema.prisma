@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum RecurrenceFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+  CUSTOM
+}
+
+enum NotificationType {
+  BUDGET_WARNING
+  BUDGET_EXCEEDED
+  RECURRING_UPCOMING
+  INCOME_UPCOMING
+  LOW_BALANCE
+  UNUSUAL_SPENDING
+  MONTH_SUMMARY
+  SAVINGS_PROGRESS
+}
+
+// Réglages globaux de l'application mono-utilisateur.
+// Une seule ligne existe jamais dans cette table (id fixe "singleton").
+model Settings {
+  id                  String   @id @default("singleton")
+  initialBalanceCents Int      @default(0)
+  currency            String   @default("EUR")
+  theme               String   @default("system") // "light" | "dark" | "system"
+  lowBalanceThreshold Int      @default(10000) // en centimes, ex: 100,00 €
+  notificationsConfig Json     @default("{}")
+  updatedAt           DateTime @updatedAt
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  icon      String? // nom d'icône lucide-react
+  type      String   @default("both") // "income" | "expense" | "both"
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  transactions          Transaction[]
+  recurringTransactions RecurringTransaction[]
+  budgetCategories      BudgetCategory[]
+  forecastItems         ForecastItem[]
+
+  @@index([type])
+}
+
+model Transaction {
+  id            String           @id @default(cuid())
+  amountCents   Int // toujours positif ; le signe est donné par `type`
+  type          TransactionType
+  name          String
+  description   String?
+  categoryId    String?
+  category      Category?        @relation(fields: [categoryId], references: [id])
+  date          DateTime
+  paymentMethod String?
+  note          String?
+
+  isRecurring           Boolean              @default(false)
+  recurringTransactionId String?
+  recurringTransaction  RecurringTransaction? @relation(fields: [recurringTransactionId], references: [id])
+
+  deletedAt DateTime? // soft-delete : non-null = dans la corbeille
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([date])
+  @@index([categoryId])
+  @@index([type])
+  @@index([deletedAt])
+}
+
+model RecurringTransaction {
+  id            String              @id @default(cuid())
+  name          String
+  amountCents   Int
+  type          TransactionType
+  categoryId    String?
+  category      Category?           @relation(fields: [categoryId], references: [id])
+  frequency     RecurrenceFrequency
+  customRuleDay Int? // pour CUSTOM : ex. jour du mois
+  startDate     DateTime
+  endDate       DateTime?
+  paymentMethod String?
+  description   String?
+  isActive      Boolean             @default(true)
+
+  transactions Transaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+model Budget {
+  id            String   @id @default(cuid())
+  month         Int // 1-12
+  year          Int
+  overallCents  Int?
+  createdAt     DateTime @default(now())
+
+  categories BudgetCategory[]
+
+  @@unique([month, year])
+}
+
+model BudgetCategory {
+  id         String   @id @default(cuid())
+  budgetId   String
+  budget     Budget   @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  amountCents Int
+
+  @@unique([budgetId, categoryId])
+}
+
+model Forecast {
+  id                    String   @id @default(cuid())
+  month                 Int
+  year                  Int
+  expectedIncomeCents   Int      @default(0)
+  expectedExpensesCents Int      @default(0)
+  expectedSavingsCents  Int      @default(0)
+  expectedEndBalanceCents Int    @default(0)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  items ForecastItem[]
+
+  @@unique([month, year])
+}
+
+model ForecastItem {
+  id          String          @id @default(cuid())
+  forecastId  String
+  forecast    Forecast        @relation(fields: [forecastId], references: [id], onDelete: Cascade)
+  categoryId  String?
+  category    Category?       @relation(fields: [categoryId], references: [id])
+  type        TransactionType
+  amountCents Int
+  label       String
+  plannedDate DateTime?
+}
+
+model SavingsGoal {
+  id                String   @id @default(cuid())
+  name              String
+  targetCents       Int
+  currentCents      Int      @default(0)
+  targetDate        DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Notification {
+  id                String           @id @default(cuid())
+  type              NotificationType
+  message           String
+  isRead            Boolean          @default(false)
+  relatedEntityType String?
+  relatedEntityId   String?
+  createdAt         DateTime         @default(now())
+}
+
+model AiConversation {
+  id        String      @id @default(cuid())
+  title     String      @default("Nouvelle conversation")
+  createdAt DateTime    @default(now())
+  messages  AiMessage[]
+}
+
+model AiMessage {
+  id             String         @id @default(cuid())
+  conversationId String
+  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String // "user" | "assistant" | "tool"
+  content        String
+  toolCalls      Json?
+  createdAt      DateTime       @default(now())
+}
