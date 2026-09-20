@@ -78,6 +78,7 @@ CREATE TABLE "Budget" (
     "month" INTEGER NOT NULL,
     "year" INTEGER NOT NULL,
     "overallCents" INTEGER,
+
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Budget_pkey" PRIMARY KEY ("id")
@@ -196,26 +197,66 @@ CREATE UNIQUE INDEX "BudgetCategory_budgetId_categoryId_key" ON "BudgetCategory"
 CREATE UNIQUE INDEX "Forecast_month_year_key" ON "Forecast"("month", "year");
 
 -- AddForeignKey
-ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Transaction"
+ADD CONSTRAINT "Transaction_categoryId_fkey"
+FOREIGN KEY ("categoryId")
+REFERENCES "Category"("id")
+ON DELETE SET NULL
+ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_recurringTransactionId_fkey" FOREIGN KEY ("recurringTransactionId") REFERENCES "RecurringTransaction"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Transaction"
+ADD CONSTRAINT "Transaction_recurringTransactionId_fkey"
+FOREIGN KEY ("recurringTransactionId")
+REFERENCES "RecurringTransaction"("id")
+ON DELETE SET NULL
+ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "RecurringTransaction" ADD CONSTRAINT "RecurringTransaction_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "RecurringTransaction"
+ADD CONSTRAINT "RecurringTransaction_categoryId_fkey"
+FOREIGN KEY ("categoryId")
+REFERENCES "Category"("id")
+ON DELETE SET NULL
+ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BudgetCategory" ADD CONSTRAINT "BudgetCategory_budgetId_fkey" FOREIGN KEY ("budgetId") REFERENCES "Budget"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "BudgetCategory"
+ADD CONSTRAINT "BudgetCategory_budgetId_fkey"
+FOREIGN KEY ("budgetId")
+REFERENCES "Budget"("id")
+ON DELETE CASCADE
+ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BudgetCategory" ADD CONSTRAINT "BudgetCategory_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "BudgetCategory"
+ADD CONSTRAINT "BudgetCategory_categoryId_fkey"
+FOREIGN KEY ("categoryId")
+REFERENCES "Category"("id")
+ON DELETE RESTRICT
+ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ForecastItem" ADD CONSTRAINT "ForecastItem_forecastId_fkey" FOREIGN KEY ("forecastId") REFERENCES "Forecast"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ForecastItem"
+ADD CONSTRAINT "ForecastItem_forecastId_fkey"
+FOREIGN KEY ("forecastId")
+REFERENCES "Forecast"("id")
+ON DELETE CASCADE
+ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ForecastItem" ADD CONSTRAINT "ForecastItem_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "ForecastItem"
+ADD CONSTRAINT "ForecastItem_categoryId_fkey"
+FOREIGN KEY ("categoryId")
+REFERENCES "Category"("id")
+ON DELETE SET NULL
+ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AiMessage" ADD CONSTRAINT "AiMessage_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "AiConversation"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "AiMessage"
+ADD CONSTRAINT "AiMessage_conversationId_fkey"
+FOREIGN KEY ("conversationId")
+REFERENCES "AiConversation"("id")
+ON DELETE CASCADE
+ON UPDATE CASCADE;
 
